@@ -1,0 +1,2 @@
+add_executable(utctime_test UtcTime_test.cc)
+target_link_libraries(utctime_test server_base)

@@ -39,7 +39,7 @@ public:
 	}
 
 	static UtcTime now();
-	static UtcTime invaild();
+	static UtcTime invalid();
 
 	static const int kMicroSecondsPerSecond = 1000 * 1000;
 private:

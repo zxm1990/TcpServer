@@ -6,13 +6,14 @@
 #include <boost/function.hpp>
 
 #include <server/base/UtcTime.h>
-
+#include <server/net/Channel.h>
 namespace server
 {
 
 namespace net
 {
 
+class EventLoop;
 class Timer;
 class TimerId;
 
@@ -21,10 +22,10 @@ class TimerQueue
 public:
 	typedef boost::function<void()> TimerCallback;
 
-	TimerQueue();
+	TimerQueue(EventLoop *loop);
 	~TimerQueue();
 
-	void tick(UtcTime now);
+//	void tick(UtcTime now);
 
 	//schedules the callback to be run at given time
 	//repeats if interval > 0.0
@@ -33,7 +34,13 @@ public:
 	void cancel(TimerId TimerId);
 
 private:
+	void timerout();
+
 	typedef std::list<Timer*> Timers;
+
+	EventLoop *loop_;
+	int timerfd_;
+	Channel timerfdChannel_;
 	Timers timers_;
 };
 

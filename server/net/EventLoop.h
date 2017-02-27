@@ -1,6 +1,8 @@
 #ifndef SERVER_NET_EVENTLOOP_H
 #define SERVER_NET_EVENTLOOP_H 
 
+#include <vector>
+
 #include <boost/function.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/noncopyable.hpp>
@@ -26,7 +28,11 @@ public:
 
 	EventLoop();
 	~EventLoop();
-
+	/*
+		Loops forever
+		Must be called in the same thread as creation of
+		the object
+	*/
 	void loop();
 	void quit();
 	void wakeup();
@@ -37,15 +43,19 @@ public:
 
 	void cancel(TimerId timerId);
 
-	void addChannel(Channel *channel);
+	void updateChannel(Channel *channel);
 	void removeChannel(Channel *channel);
 
 private:
 	void init();
+	typedef std::vector<Channel*> ChannelList;
 
 	boost::scoped_ptr<Poller> poller_;
 	boost::scoped_ptr<TimerQueue> timerQueue_;
+	bool looping_;//atomic
 	bool quit_;
+	pid_t thread_;
+	ChannelList activeChannels_;
 	
 };
 }

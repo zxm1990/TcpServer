@@ -1,6 +1,8 @@
 #include <server/net/EventLoop.h>
 
-#include <server/base/UtcTime.h>
+#include <server/base/Mutex.h>
+#include <server/base/Thread.h>
+
 #include <server/net/Channel.h>
 #include <server/net/Poller.h>
 #include <server/net/TimerQueue.h>
@@ -10,8 +12,10 @@ using namespace server::net;
 
 EventLoop::EventLoop()
 	: poller_(Poller::newDefaultPoller()),
-	  timerQueue_(new TimerQueue),
-	  quit_(false)
+	  timerQueue_(new TimerQueue(this)),
+	  looping_(false),
+	  quit_(false),
+	  thread_(CurrentThread::tid())
 {
 	init();
 }
@@ -23,12 +27,21 @@ EventLoop::~EventLoop()
 
 void EventLoop::loop()
 {
+	assert(!looping_);
+	looping_ = true;
+
 	while (!quit_)
 	{
-		poller_->poll(1000);
+		activeChannels_.clear();
+		poller_->poll(1000, &activeChannels_);
+		for (ChannelList::iterator it = activeChannels_.begin(); 
+			it != activeChannels_.end(); ++it)
+		{
+			(*it)->handle_event();
+		}
 	}
 
-
+	looping_ = false;
 }
 
 void EventLoop::quit()
@@ -36,7 +49,7 @@ void EventLoop::quit()
 	quit_ = true;
 }
 
-void EventLoop::addChannel(Channel *channel)
+void EventLoop::updateChannel(Channel *channel)
 {
 	assert(channel->getLoop() == this);
 }

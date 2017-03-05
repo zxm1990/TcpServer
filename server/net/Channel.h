@@ -4,7 +4,6 @@
 #include <boost/function.hpp>
 #include <boost/noncopyable.hpp>
 
-#include <server/net/Socket.h>
 
 namespace server
 {
@@ -57,6 +56,16 @@ public:
 		revents_ = revt;
 	}
 
+	int index() const
+	{
+		return index_;
+	}
+
+	void set_index(int idx)
+	{
+		index_ = idx;
+	}
+
 	EventLoop* getLoop() {return loop_; }
 
 private:
@@ -64,6 +73,7 @@ private:
 	int       fd_;
 	int       events_;
 	int       revents_;
+	int       index_;
 	EventCallback readCallback_;
 	EventCallback writeCallback_;
 	EventCallback errorCallback_;

@@ -19,6 +19,8 @@ public:
 
 	}
 
+	~Socket();
+
 	int fd() { return sockfd_; }
 
 	//Enable/disable TCP_NODELAY (disable / enable Nagle's algorithm)

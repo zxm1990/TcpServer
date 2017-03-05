@@ -7,33 +7,61 @@
 #include <server/net/Poller.h>
 #include <server/net/TimerQueue.h>
 
+#include <boost/bind.hpp>
+
+#include <stdio.h>
+#include <sys/eventfd.h>
+
 using namespace server;
 using namespace server::net;
 
-EventLoop::EventLoop()
-	: poller_(Poller::newDefaultPoller()),
-	  timerQueue_(new TimerQueue(this)),
-	  looping_(false),
-	  quit_(false),
-	  thread_(CurrentThread::tid())
+namespace
 {
-	init();
+
+const int kPollTimeMs = 10000;
+
+int createEventfd()
+{
+	int evtfd = ::eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
+	if (evtfd < 0)
+	{
+		perror("Failed in eventfd");
+		abort();
+	}
+
+	return evtfd;
+}
+}
+
+EventLoop::EventLoop()
+	: looping_(false),
+	  quit_(false),
+	  threadId_(CurrentThread::tid()),
+	  poller_(Poller::newDefaultPoller()),
+	  timerQueue_(new TimerQueue(this)),
+	  wakeupFd_(createEventfd()),
+	  wakeupChannel_(new Channel(this, wakeupFd_))
+{
+	wakeupChannel_->septReadCallback(boost::bind(&EventLoop::wakeup, this));
+	//we are always reading the wakeupfd, like the old pipe way
+	wakeupChannel_->set_events(Channel::kReadEvent);
+	updateChannel(get_pointer(wakeupChannel_));
 }
 
 EventLoop::~EventLoop()
 {
-
+	::close(wakeupFd_);
 }
 
 void EventLoop::loop()
 {
-	assert(!looping_);
+	assertInLoopThread();
 	looping_ = true;
 
 	while (!quit_)
 	{
 		activeChannels_.clear();
-		poller_->poll(1000, &activeChannels_);
+		poller_->poll(kPollTimeMs, &activeChannels_);
 		for (ChannelList::iterator it = activeChannels_.begin(); 
 			it != activeChannels_.end(); ++it)
 		{
@@ -52,10 +80,30 @@ void EventLoop::quit()
 void EventLoop::updateChannel(Channel *channel)
 {
 	assert(channel->getLoop() == this);
+	assertInLoopThread();
+	poller_->updateChannel(channel);
 }
 
-void EventLoop::init()
+void EventLoop::removeChannle(Channel* channel)
 {
+
+}
+
+void EventLoop::assertInLoopThread()
+{
+	assert(threadId_ == CurrentThread::tid());
+}
+
+void EventLoop::runInLoop(const Functor& cb)
+{
+	if (threadId_ == CurrentThread::tid())
+	{
+		cb();
+	}
+	else
+	{
+		abort();
+	}
 
 }
 
@@ -74,6 +122,20 @@ TimerId EventLoop::runEvery(double interval, const TimerCallback &cb)
 {
 	UtcTime time(addTime(UtcTime::now(), interval));
 	return timerQueue_->schedule(cb, time, interval);
+}
+void EventLoop::wakeup()
+{
+	uint64_t one = 1;
+	ssize_t n = ::write(wakeupFd_, &one, sizeof(one));
+	if (n != sizeof(one))
+	{
+		fprintf(stderr, "EventLoop::wakeup() write %zd bytes instead of 8\n", n);
+	}
+}
+
+void EventLoop::wakedup()
+{
+
 }
 
 

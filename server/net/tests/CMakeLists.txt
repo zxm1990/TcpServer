@@ -1,3 +1,3 @@
-add_executable(EventLoop_test EventLoop_test.cc)
+add_executable(eventLoop_test EventLoop_test.cc)
 
-target_link_libraries(EventLoop_test server_net server_base)
+target_link_libraries(eventLoop_test server_net server_base)

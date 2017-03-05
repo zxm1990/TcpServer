@@ -4,7 +4,9 @@
 #include <list>
 
 #include <boost/function.hpp>
+#include <boost/noncopyable.hpp>
 
+#include <server/base/Mutex.h>
 #include <server/base/UtcTime.h>
 #include <server/net/Channel.h>
 namespace server
@@ -25,23 +27,23 @@ public:
 	TimerQueue(EventLoop *loop);
 	~TimerQueue();
 
-//	void tick(UtcTime now);
-
 	//schedules the callback to be run at given time
 	//repeats if interval > 0.0
+	// Must be thread safe
 	TimerId schedule(const TimerCallback &cb, UtcTime at, double interval);
 
 	void cancel(TimerId TimerId);
 
 private:
-	void timerout();
+	// void timerout();
 
-	typedef std::list<Timer*> Timers;
+	typedef std::list<Timer*> TimerList;
 
 	EventLoop *loop_;
-	int timerfd_;
-	Channel timerfdChannel_;
-	Timers timers_;
+	// const int timerfd_;
+	// Channel timerfdChannel_;
+	MutexLock mutex_;
+	TimerList timers_;
 };
 
 }

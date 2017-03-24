@@ -29,21 +29,21 @@ public:
 
 	//schedules the callback to be run at given time
 	//repeats if interval > 0.0
-	// Must be thread safe
-	TimerId schedule(const TimerCallback &cb, UtcTime at, double interval);
+	// Must be thread safe, Usually be called from other threads
+	TimerId schedule(const TimerCallback &cb, UtcTime when, double interval);
 
 	void cancel(TimerId TimerId);
 
 private:
-	// void timerout();
-
+	void timerout();//called when timerfds arms
+	bool insertWithLockHold(Timer *timer);//insert timer in sorted list
 	typedef std::list<Timer*> TimerList;
 
 	EventLoop *loop_;
 	// const int timerfd_;
 	// Channel timerfdChannel_;
 	MutexLock mutex_;
-	TimerList timers_;
+	TimerList timers_;//Timer list sorted by expiration
 };
 
 }

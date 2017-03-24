@@ -23,13 +23,24 @@ void print(const char *msg)
 
 int main()
 {
-	printf("pid = %d\n", getpid());
-	EventLoop theLoop;
+	printf("pid = %d, tid = %d\n", getpid(), CurrendThread::tid());
+	
+	sleep(10);
+	{
+		EventLoop loop;
+		g_loop = &loop;
+		print("main");
+    	loop.runAfter(1, boost::bind(print, "once1"));
+    	loop.runAfter(1.5, boost::bind(print, "once1.5"));
+    	loop.runAfter(2.5, boost::bind(print, "once2.5"));
+    	loop.runAfter(3.5, boost::bind(print, "once3.5"));
+    	loop.runEvery(2, boost::bind(print, "every2"));
+    	loop.runEvery(3, boost::bind(print, "every3"));
 
-	print();
+  		loop.loop();
+    	print("exit");
+	}
 
-	theLoop.runAfter(1.0, print);
-	theLoop.loop();
-
-	printf("test success!\n");
+	sleep(30);
+	
 }

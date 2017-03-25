@@ -6,7 +6,7 @@
 
 namespace server
 {
-class Date : public muduo::copyable
+class Date : public server::copyable
           // public boost::less_than_comparable<Date>,
           // public boost::equality_comparable<Date>
 {

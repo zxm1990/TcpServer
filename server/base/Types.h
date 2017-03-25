@@ -21,7 +21,7 @@ namespace server
 
 #ifdef SERVER_STD_STRING
 using std::string;
-#else  // !MUDUO_STD_STRING
+#else  // !SERVER_STD_STRING
 typedef __gnu_cxx::__sso_string string;
 #endif
 
@@ -52,4 +52,4 @@ inline To down_cast(From* f)                     // so we only accept pointers
 
 }
 
-#endif //SERVER_BASE_TYPES_H
+#endif // SERVER_BASE_TYPES_H

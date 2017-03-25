@@ -10,7 +10,7 @@
 namespace server
 {
 
-class Timestamp : public muduo::copyable,
+class Timestamp : public server::copyable,
                   public boost::less_than_comparable<Timestamp>
 {
  public:

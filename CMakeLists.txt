@@ -1,10 +1,16 @@
 cmake_minimum_required(VERSION 2.6)
 
-project(server CXX)
+project(server C CXX)
+
+set(CXX_FLAGS
+ -g
+ -DSERVER_STD_STRING
+ )
 
 
  string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CXX_FLAGS}")
 
+set(CMAKE_CXX_COMPILER "clang++")
 set(CMAKE_CXX_FLAGS_DEBUG "-O0")
 set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
 

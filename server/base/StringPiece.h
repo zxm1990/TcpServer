@@ -26,13 +26,13 @@ public:
 
 	}
 
-	#ifndef SERVER_STD_STRING
+#ifndef SERVER_STD_STRING
 	StringArg(const std::string &str)
 		:str_(str.c_str())
 	{
 
 	}
-	#endif
+#endif
 
 	const char* c_str() const
 	{
@@ -55,34 +55,34 @@ public:
 	}
 
 	StringPiece(const char *str)
-		: ptr_(str_),
+		: ptr_(str),
 		  length_(static_cast<int>(strlen(ptr_)))
 	{
 
 	}
 
 	StringPiece(const unsigned char *str)
-		: ptr_(reinterpret_cast<const char*>(str_)),
+		: ptr_(reinterpret_cast<const char*>(str)),
 		  length_(static_cast<int>(strlen(ptr_)))
 	{
 		
 	}
 
 	StringPiece(const string &str)
-		: ptr_(str_.date()),
-		  length_(static_cast<int>(ptr_.size()))
+		: ptr_(str.data()),
+		  length_(static_cast<int>(str.size()))
 	{
 		
 	}
 
-	#ifndef SERVER_STD_STRING
+#ifndef SERVER_STD_STRING
 	StringPiece(const std::string &str)
 		: ptr_(str_.date()),
-		  length_(static_cast<int>(ptr_.size()))
+		  length_(static_cast<int>(str.size()))
 	{
 		
 	}
-	#endif
+#endif
 
 	StringPiece(const char* offset, int len)
     	: ptr_(offset), length_(len) 
@@ -195,7 +195,7 @@ public:
 
   	void CopyToString(string* target) const 
   	{
-  		arget->assign(ptr_, length_);
+  		target->assign(ptr_, length_);
   	}
 
 #ifndef MUDUO_STD_STRING
@@ -219,7 +219,7 @@ private:
 } //namespace server
 
 // allow StringPiece to be logged
-std::ostream& operator<<(std::ostream& o, const muduo::StringPiece& piece);
+std::ostream& operator<<(std::ostream& o, const server::StringPiece& piece);
 
 
 #endif //SERVER_BASE_STRINGPIECE_H

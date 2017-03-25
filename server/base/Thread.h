@@ -38,6 +38,7 @@ public:
 		return name_;
 	}
 
+	//记录创建线程个数
 	static int numCreated()
 	{
 		return numCreated_.get()

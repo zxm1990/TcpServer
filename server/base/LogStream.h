@@ -17,7 +17,7 @@ namespace detail
 {
 
 const int kSmallBuffer = 4000;
-const int kLargeBuffer == 4000 * 1000;
+const int kLargeBuffer = 4000 * 1000;
 
 template <int SIZE>
 class FixedBuffer : boost::noncopyable
@@ -63,6 +63,11 @@ public:
 		return static_cast<int>(end() - cur_);
 	}
 
+	void reset()
+	{
+		cur_ = data_;
+	}
+	
 	void add(size_t len)
 	{
 		cur_ += len;
@@ -164,7 +169,7 @@ public:
 		buffer_.append(v.c_str(), v.size());
 		return *this;
 	}
-#ifndef MUDUO_STD_STRING
+#ifndef SERVER_STD_STRING
 	self& operator<<(const std::string& v)
  	{
     	buffer_.append(v.c_str(), v.size());
@@ -188,7 +193,7 @@ public:
 		return buffer_;
 	}
 
-	void reserBuffer()
+	void resetBuffer()
 	{
 		buffer_.reset();
 	}

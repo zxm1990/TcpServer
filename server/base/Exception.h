@@ -1,10 +1,10 @@
 #ifndef SERVER_BASE_EXCEPTION_H
 #define SERVER_BASE_EXCEPTION_H
 
-#include <server/base/Type.h>
+#include <server/base/Types.h>
 #include <exception>
 
-namespace muduo
+namespace server
 {
 
 class Exception : public std::exception

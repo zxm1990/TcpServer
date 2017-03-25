@@ -19,12 +19,12 @@ public:
 
 	~Condition()
 	{
-		pthread_cond_detroy(&pcond_);
+		pthread_cond_destroy(&pcond_);
 	}
 
 	void wait()
 	{
-		MutexLock::unassignGuard ug(mutex_);
+		MutexLock::UnassignGuard ug(mutex_);
 		pthread_cond_wait(&pcond_, mutex_.getPthreadMutex());
 	}
 
@@ -37,7 +37,7 @@ public:
 
 	void notifyAll()
 	{
-		pthread_cond_broadcase(&pcond_);
+		pthread_cond_broadcast(&pcond_);
 	}
 
 private:

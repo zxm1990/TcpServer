@@ -96,6 +96,7 @@ TimeZone g_logTimeZone;
 
 using namespace server;
 
+//将日志写入stdout，在刷新缓冲区
 Logger::Impl::Impl(LogLevel level, int savedErrno, const SourceFile& file, int line)
   : time_(Timestamp::now()),
     stream_(),

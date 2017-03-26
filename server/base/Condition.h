@@ -30,11 +30,13 @@ public:
 
 	bool waitForSeconds(int seconds);
 
+	//signal表示资源可用
 	void notify()
 	{
 		pthread_cond_signal(&pcond_);
 	}
 
+	//broadcast表示资源变化
 	void notifyAll()
 	{
 		pthread_cond_broadcast(&pcond_);

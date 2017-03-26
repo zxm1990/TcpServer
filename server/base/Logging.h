@@ -9,6 +9,7 @@ namespace server
 
 class TimeZone;
 
+//日志类
 class Logger
 {
  public:
@@ -32,6 +33,7 @@ class Logger
       : data_(arr),
         size_(N-1)
     {
+      //查找/在字符串最后一次出现的位置
       const char* slash = strrchr(data_, '/'); // builtin function
       if (slash)
       {
@@ -51,6 +53,7 @@ class Logger
       size_ = static_cast<int>(strlen(data_));
     }
 
+    //data指向最后一个'/'之后的名字
     const char* data_;
     int size_;
   };
@@ -100,7 +103,7 @@ inline Logger::LogLevel Logger::logLevel()
   return g_logLevel;
 }
 
-
+//将数据记录到buffer中
 #define LOG_TRACE if (server::Logger::logLevel() <= server::Logger::TRACE) \
   server::Logger(__FILE__, __LINE__, server::Logger::TRACE, __func__).stream()
 #define LOG_DEBUG if (server::Logger::logLevel() <= server::Logger::DEBUG) \

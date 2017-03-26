@@ -12,6 +12,7 @@
 namespace server
 {
 
+//将string和char同一整合到stringPiece类
 class StringArg
 {
 public:
@@ -44,6 +45,7 @@ private:
 	
 };
 
+//兼容c语言字符串
 class StringPiece
 {
 public:
@@ -198,7 +200,7 @@ public:
   		target->assign(ptr_, length_);
   	}
 
-#ifndef MUDUO_STD_STRING
+#ifndef SERVER_STD_STRING
   	void CopyToStdString(std::string* target) const 
   	{
   		target->assign(ptr_, length_);

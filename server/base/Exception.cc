@@ -32,6 +32,7 @@ const char* Exception::stackTrace() const throw()
 	return stack_.c_str();
 }
 
+//记录调用栈，用于调试
 void Exception::fillStackTrace()
 {
 	const int len = 200;

@@ -9,6 +9,7 @@ namespace server
 {
 
 //TimerZone for 1970~2030
+//时区转换
 class TimeZone : public server::copyable
 {
 public:

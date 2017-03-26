@@ -16,6 +16,8 @@ namespace CurrentThread
 
 	void cacheTid();
 
+	//除了第一次系统调用获取tid
+	//之后从全局变量中取，避免系统开销
 	inline int tid()
 	{
 		//类似unlikely

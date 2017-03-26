@@ -58,11 +58,13 @@ public:
 		return cur_;
 	}
 
+	//剩余的存储空间
 	int avail() const
 	{
 		return static_cast<int>(end() - cur_);
 	}
 
+	//buffer重置
 	void reset()
 	{
 		cur_ = data_;
@@ -98,8 +100,12 @@ private:
 	}
 
 	//Must be outline function for cookies
+	//构造函数注册cookiesStart
 	static void cookieStart();
+	
+	//析构函数去注册cookiesEnd
 	static void cookieEnd();
+	
 	void (*cookie_)();
 	char data_[SIZE];
 	char *cur_;

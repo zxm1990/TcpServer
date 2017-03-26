@@ -16,4 +16,4 @@ set(base_SRCS
 
 add_library(server_base ${base_SRCS})
 
-#add_subdirectory(test)
+add_subdirectory(test)

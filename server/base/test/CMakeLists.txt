@@ -1,2 +1,2 @@
-add_executable(utctime_test UtcTime_test.cc)
-target_link_libraries(utctime_test server_base)
+add_executable(TimeZone_test TimeZone_test.cc)
+target_link_libraries(TimeZone_test server_base)

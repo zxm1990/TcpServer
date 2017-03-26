@@ -1,82 +1,129 @@
-typedef boost::ptr_vector<LargeBuffer> BufferVector;
-typedef BufferVector::auto_type        BufferPtr;
-MutexLock      mutex_;
-Condition      cond_;
-BufferPtr      currentBuffer_;  //当前缓冲区
-BufferPtr      nextBuffer_;     //预备缓冲区
-BufferVector   buffers_;        //待写入文件已填满的缓冲
+#include <server/base/AsyncLogging.h>
+#include <server/base/LogFile.h>
+#include <server/base/Timestamp.h>
 
-/*
-typedef BufferVector::auto_type 类似C++11的std::unique_ptr 具备移动语义，
-而且能自动管理生命周期
-*/
+#include <stdio.h>
 
-//前端写入日志
+using namespace server;
+
+AsyncLogging::AsyncLogging(const string& basename,
+                           size_t rollSize,
+                           int flushInterval)
+  : flushInterval_(flushInterval),
+    running_(false),
+    basename_(basename),
+    rollSize_(rollSize),
+    thread_(boost::bind(&AsyncLogging::threadFunc, this), "Logging"),
+    latch_(1),
+    mutex_(),
+    cond_(mutex_),
+    currentBuffer_(new Buffer),
+    nextBuffer_(new Buffer),
+    buffers_()
+{
+  currentBuffer_->bzero();
+  nextBuffer_->bzero();
+  buffers_.reserve(16);
+}
+
 void AsyncLogging::append(const char* logline, int len)
 {
-	MutexLockGuard lock(mutex_);
+  server::MutexLockGuard lock(mutex_);
+  if (currentBuffer_->avail() > len)
+  {
+    currentBuffer_->append(logline, len);
+  }
+  else
+  {
+    buffers_.push_back(currentBuffer_.release());
 
-	//如果当前剩余空间足够大
-	if (currentBuffer_->avail() > len)
-	{
-		currentBuffer_.append(logline, len);
-	}
-	else 
-	{
-		//buffer 已经满了，添加到vector中
-		buffers_.push_back(currentBuffer_.release());
-
-		if (nextBuffer_)
-		{
-			//预备缓冲区可用
-			//移动而不是复制
-			currentBuffer_ = boost::ptr_container::move(nextBuffer_);
-		}
-		else
-		{
-			//预备缓冲区也满了
-			currentBuffer_.reset(new LargeBuffer);
-		}
-
-		currentBuffer_.append(logline, len);
-
-		//当前缓冲区满，通知后端
-		cond_.notify();
-	}
+    if (nextBuffer_)
+    {
+      currentBuffer_ = boost::ptr_container::move(nextBuffer_);
+    }
+    else
+    {
+      currentBuffer_.reset(new Buffer); // Rarely happens
+    }
+    currentBuffer_->append(logline, len);
+    cond_.notify();
+  }
 }
 
-//后端写入文件
 void AsyncLogging::threadFunc()
 {
-	BufferPtr newBuffer1(new LargeBuffer);
-	BufferPtr newBuffer2(new LargeBuffer);
-	BufferVector bufferToWrite;
+  assert(running_ == true);
+  latch_.countDown();
+  LogFile output(basename_, rollSize_, false);
+  BufferPtr newBuffer1(new Buffer);
+  BufferPtr newBuffer2(new Buffer);
+  newBuffer1->bzero();
+  newBuffer2->bzero();
+  BufferVector buffersToWrite;
+  buffersToWrite.reserve(16);
+  while (running_)
+  {
+    assert(newBuffer1 && newBuffer1->length() == 0);
+    assert(newBuffer2 && newBuffer2->length() == 0);
+    assert(buffersToWrite.empty());
 
-	while (running_)
-	{
-		//交换要写入的缓冲区，保持临界区最短
-		{
-			MutexLockGuard lock(mutex_);
-			if (buffers_.empty())
-			{
-				cond_.waitForSeconds(flushInterval_);
-			}
-			//将当前的缓冲区压入
-			buffers_.push_back(currentBuffer_.release());
-			//当前缓冲区指向空闲
-			currentBuffer_ = boost::ptr_container::move(newBuffer1);
-			//交换
-			bufferToWrite.swap(buffers_);
+    {
+      server::MutexLockGuard lock(mutex_);
+      if (buffers_.empty())  // unusual usage!
+      {
+        cond_.waitForSeconds(flushInterval_);
+      }
+      buffers_.push_back(currentBuffer_.release());
+      currentBuffer_ = boost::ptr_container::move(newBuffer1);
+      buffersToWrite.swap(buffers_);
+      if (!nextBuffer_)
+      {
+        nextBuffer_ = boost::ptr_container::move(newBuffer2);
+      }
+    }
 
-			if (!nextBuffer_)
-			{
-				nextBuffer_ = boost::ptr_container::move(newBuffer2);
-			}
-		}
+    assert(!buffersToWrite.empty());
 
-		//将 bufferToWrite写入文件
-		//重新填充newBuffer1 and newBuffer2
-	}
+    if (buffersToWrite.size() > 25)
+    {
+      char buf[256];
+      snprintf(buf, sizeof buf, "Dropped log messages at %s, %zd larger buffers\n",
+               Timestamp::now().toFormattedString().c_str(),
+               buffersToWrite.size()-2);
+      fputs(buf, stderr);
+      output.append(buf, static_cast<int>(strlen(buf)));
+      buffersToWrite.erase(buffersToWrite.begin()+2, buffersToWrite.end());
+    }
 
-	//刷新flush
+    for (size_t i = 0; i < buffersToWrite.size(); ++i)
+    {
+      // FIXME: use unbuffered stdio FILE ? or use ::writev ?
+      output.append(buffersToWrite[i].data(), buffersToWrite[i].length());
+    }
+
+    if (buffersToWrite.size() > 2)
+    {
+      // drop non-bzero-ed buffers, avoid trashing
+      buffersToWrite.resize(2);
+    }
+
+    if (!newBuffer1)
+    {
+      assert(!buffersToWrite.empty());
+      newBuffer1 = buffersToWrite.pop_back();
+      newBuffer1->reset();
+    }
+
+    if (!newBuffer2)
+    {
+      assert(!buffersToWrite.empty());
+      newBuffer2 = buffersToWrite.pop_back();
+      newBuffer2->reset();
+    }
+
+    buffersToWrite.clear();
+    output.flush();
+  }
+  output.flush();
 }
+

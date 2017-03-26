@@ -1,16 +1,18 @@
 set(base_SRCS
-  #AsyncLogging.cc
+  AsyncLogging.cc
   Condition.cc
-  #CountDownLatch.cc
+  CountDownLatch.cc
   Date.cc
   Exception.cc
   FileUtil.cc
-  #LogFile.cc
+  LogFile.cc
   Logging.cc
   LogStream.cc
   ProcessInfo.cc 
   Timestamp.cc
-  TimeZone.cc)
+  TimeZone.cc
+  Thread.cc
+  ThreadPool.cc)
 
 add_library(server_base ${base_SRCS})
 

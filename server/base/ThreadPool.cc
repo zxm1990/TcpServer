@@ -26,6 +26,7 @@ ThreadPool::~ThreadPool()
 	}
 }
 
+//创建numThreads个线程
 void ThreadPool::start(int numThreads)
 {
 	assert(threads_.empty());

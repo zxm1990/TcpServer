@@ -10,6 +10,8 @@ namespace server
 
 // A barely usable WeakCallback
 
+//回调函数管理
+//当回调函数参数对象还活着的时候，才能调用这个回调函数
 template<typename CLASS>
 class WeakCallback
 {
@@ -35,6 +37,7 @@ public:
 
 private:
 
+    //不增加引用计数，只能表明对象是否活着
     boost::weak_ptr<CLASS> object_;
     boost::function<void (CLASS*)> function_;
 };

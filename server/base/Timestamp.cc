@@ -20,6 +20,7 @@ Timestamp::Timestamp(int64_t microseconds)
 {
 }
 
+//字符串的格式 1900.60000， 秒
 string Timestamp::toString() const
 {
   char buf[32] = {0};
@@ -29,6 +30,7 @@ string Timestamp::toString() const
   return buf;
 }
 
+//字符串的格式为2012.12.22 11：22：33 年月日，时分秒
 string Timestamp::toFormattedString(bool showMicroseconds) const
 {
   char buf[32] = {0};
@@ -53,6 +55,7 @@ string Timestamp::toFormattedString(bool showMicroseconds) const
   return buf;
 }
 
+//使用gettimeofday获取当前时间，秒
 Timestamp Timestamp::now()
 {
   struct timeval tv;
@@ -61,6 +64,7 @@ Timestamp Timestamp::now()
   return Timestamp(seconds * kMicroSecondsPerSecond + tv.tv_usec);
 }
 
+//返回一个不合法的时间
 Timestamp Timestamp::invalid()
 {
   return Timestamp();

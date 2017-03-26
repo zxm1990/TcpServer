@@ -21,7 +21,7 @@ public:
 	~Thread();
 	
 	void start();
-	void join(); //return pthread_join()
+	int join(); //return pthread_join()
 
 	bool start() const 
 	{
@@ -33,7 +33,7 @@ public:
 		return *tid_;
 	}
 
-	const stirng& name()
+	const string& name()
 	{
 		return name_;
 	}
@@ -41,7 +41,7 @@ public:
 	//记录创建线程个数
 	static int numCreated()
 	{
-		return numCreated_.get()
+		return numCreated_.get();
 	}
 
 private:

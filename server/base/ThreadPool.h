@@ -31,7 +31,7 @@ public:
 
 	void setThreadInitCallback(const Task &cb)
 	{
-		threadInitCallbakc_ = cb;
+		threadInitCallback_ = cb;
 	}
 
 	void start(int numThreads);
@@ -48,7 +48,7 @@ private:
 	Condition notEmpty_;
 	Condition notFull_;
 	string name_;
-	Task threadInitCallbakc_;
+	Task threadInitCallback_;
 	boost::ptr_vector<server::Thread> threads_;
 	std::deque<Task> queue_;
 	size_t maxQueueSize_;

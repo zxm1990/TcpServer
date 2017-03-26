@@ -71,8 +71,8 @@ private:
 };
 }
 
-typedef detail::AtomicIntegerT<int32_t> AtomicInte32;
-typedef detail::AtomicIntegerT<int64_t> AtomicInte64;
+typedef detail::AtomicIntegerT<int32_t> AtomicInt32;
+typedef detail::AtomicIntegerT<int64_t> AtomicInt64;
 }
 
 

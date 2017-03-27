@@ -1,36 +1,78 @@
 #ifndef SERVER_NET_SOCKET_H
 #define SERVER_NET_SOCKET_H
 
+#include <boost/noncopyable.hpp>
+
+// struct tcp_info is in <netinet/tcp.h>
+struct tcp_info;
+
 namespace server
 {
-// TCP networking
-
+///
+/// TCP networking.
+///
 namespace net
 {
 
-//Wrapper of socket file descriptor
+class InetAddress;
 
-class Socket
+///
+/// Wrapper of socket file descriptor.
+///
+/// It closes the sockfd when desctructs.
+/// It's thread safe, all operations are delagated to OS.
+class Socket : boost::noncopyable
 {
-public:
-	explicit Socket(int sockfd)
-		: sockfd_(sockfd)
-	{
+ public:
+  explicit Socket(int sockfd)
+    : sockfd_(sockfd)
+  { }
 
-	}
+  // Socket(Socket&&) // move constructor in C++11
+  ~Socket();
 
-	~Socket();
+  int fd() const { return sockfd_; }
+  // return true if success.
+  bool getTcpInfo(struct tcp_info*) const;
+  bool getTcpInfoString(char* buf, int len) const;
 
-	int fd() { return sockfd_; }
+  /// abort if address in use
+  void bindAddress(const InetAddress& localaddr);
+  /// abort if address in use
+  void listen();
 
-	//Enable/disable TCP_NODELAY (disable / enable Nagle's algorithm)
-	void setTcpNoDelay(bool on);
+  /// On success, returns a non-negative integer that is
+  /// a descriptor for the accepted socket, which has been
+  /// set to non-blocking and close-on-exec. *peeraddr is assigned.
+  /// On error, -1 is returned, and *peeraddr is untouched.
+  int accept(InetAddress* peeraddr);
 
-private:
-	int sockfd_;
+  void shutdownWrite();
+
+  ///
+  /// Enable/disable TCP_NODELAY (disable/enable Nagle's algorithm).
+  ///
+  void setTcpNoDelay(bool on);
+
+  ///
+  /// Enable/disable SO_REUSEADDR
+  ///
+  void setReuseAddr(bool on);
+
+  ///
+  /// Enable/disable SO_REUSEPORT
+  ///
+  void setReusePort(bool on);
+
+  ///
+  /// Enable/disable SO_KEEPALIVE
+  ///
+  void setKeepAlive(bool on);
+
+ private:
+  const int sockfd_;
 };
 
 }
 }
-
-#endif //SERVER_NET_SOCKET_H
+#endif  // SERVER_NET_SOCKET_H

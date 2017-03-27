@@ -64,7 +64,6 @@ public:
 	{
 		return __sync_lock_test_and_set(&value_, newValue);
 	}
-	~AtomicIntegerT();
 	
 private:
 	volatile T value_;

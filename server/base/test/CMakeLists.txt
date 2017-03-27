@@ -1,2 +1,6 @@
+
+add_executable(ThreadPool_test ThreadPool_test.cc)
+target_link_libraries(ThreadPool_test server_base)
+
 add_executable(TimeZone_test TimeZone_test.cc)
 target_link_libraries(TimeZone_test server_base)

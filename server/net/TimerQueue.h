@@ -1,17 +1,18 @@
 #ifndef SERVER_NET_TIMERQUEUE_H
 #define SERVER_NET_TIMERQUEUE_H
 
-#include <list>
+#include <set>
+#include <vector>
 
-#include <boost/function.hpp>
 #include <boost/noncopyable.hpp>
 
 #include <server/base/Mutex.h>
-#include <server/base/UtcTime.h>
+#include <server/base/Timestamp.h>
+#include <server/net/Callbacks.h>
 #include <server/net/Channel.h>
+
 namespace server
 {
-
 namespace net
 {
 
@@ -19,34 +20,55 @@ class EventLoop;
 class Timer;
 class TimerId;
 
-class TimerQueue
+///
+/// A best efforts timer queue.
+/// No guarantee that the callback will be on time.
+///
+class TimerQueue : boost::noncopyable
 {
-public:
-	typedef boost::function<void()> TimerCallback;
+ public:
+  TimerQueue(EventLoop* loop);
+  ~TimerQueue();
 
-	TimerQueue(EventLoop *loop);
-	~TimerQueue();
+  ///
+  /// Schedules the callback to be run at given time,
+  /// repeats if @c interval > 0.0.
+  ///
+  /// Must be thread safe. Usually be called from other threads.
+  TimerId addTimer(const TimerCallback& cb,
+                   Timestamp when,
+                   double interval);
 
-	//schedules the callback to be run at given time
-	//repeats if interval > 0.0
-	// Must be thread safe, Usually be called from other threads
-	TimerId schedule(const TimerCallback &cb, UtcTime when, double interval);
+  void cancel(TimerId timerId);
 
-	void cancel(TimerId TimerId);
+  int getTimeout() const;
+  void processTimers();
 
-private:
-	void timerout();//called when timerfds arms
-	bool insertWithLockHold(Timer *timer);//insert timer in sorted list
-	typedef std::list<Timer*> TimerList;
+ private:
 
-	EventLoop *loop_;
-	// const int timerfd_;
-	// Channel timerfdChannel_;
-	MutexLock mutex_;
-	TimerList timers_;//Timer list sorted by expiration
+  // FIXME: use unique_ptr<Timer> instead of raw pointers.
+  typedef std::pair<Timestamp, Timer*> Entry;
+  typedef std::set<Entry> TimerList;
+  typedef std::pair<Timer*, int64_t> ActiveTimer;
+  typedef std::set<ActiveTimer> ActiveTimerSet;
+
+  void addTimerInLoop(Timer* timer);
+  void cancelInLoop(TimerId timerId);
+  // move out all expired timers
+  std::vector<Entry> getExpired(Timestamp now);
+  void reset(const std::vector<Entry>& expired, Timestamp now);
+
+  bool insert(Timer* timer);
+
+  EventLoop* loop_;
+  TimerList timers_;
+
+  // for cancel()
+  ActiveTimerSet activeTimers_;
+  bool callingExpiredTimers_; /* atomic */
+  ActiveTimerSet cancelingTimers_;
 };
 
 }
 }
-
-#endif //SERVER_NET_TIMERQUEUE_H
+#endif  // SERVER_NET_TIMERQUEUE_H

@@ -115,6 +115,7 @@ void EventLoop::loop()
     }
     currentActiveChannel_ = NULL;
     eventHandling_ = false;
+    //执行从其他线程过来的回调函数
     doPendingFunctors();
   }
 
@@ -130,10 +131,13 @@ void EventLoop::quit()
   // Can be fixed using mutex_ in both places.
   if (!isInLoopThread())
   {
+  	//必须唤醒
     wakeup();
   }
 }
 
+//本线程的回调立即执行
+//其他线程的回调放入队列中
 void EventLoop::runInLoop(const Functor& cb)
 {
   if (isInLoopThread())
@@ -146,8 +150,11 @@ void EventLoop::runInLoop(const Functor& cb)
   }
 }
 
+//将其他线程的回调加入到队列中
+
 void EventLoop::queueInLoop(const Functor& cb)
 {
+  ////这里只对pendingFunctors_保护
   {
   MutexLockGuard lock(mutex_);
   pendingFunctors_.push_back(cb);
@@ -175,51 +182,6 @@ TimerId EventLoop::runEvery(double interval, const TimerCallback& cb)
   Timestamp time(addTime(Timestamp::now(), interval));
   return timerQueue_->addTimer(cb, time, interval);
 }
-
-#ifdef __GXX_EXPERIMENTAL_CXX0X__
-// FIXME: remove duplication
-void EventLoop::runInLoop(Functor&& cb)
-{
-  if (isInLoopThread())
-  {
-    cb();
-  }
-  else
-  {
-    queueInLoop(std::move(cb));
-  }
-}
-
-void EventLoop::queueInLoop(Functor&& cb)
-{
-  {
-  MutexLockGuard lock(mutex_);
-  pendingFunctors_.push_back(std::move(cb));  // emplace_back
-  }
-
-  if (!isInLoopThread() || callingPendingFunctors_)
-  {
-    wakeup();
-  }
-}
-
-TimerId EventLoop::runAt(const Timestamp& time, TimerCallback&& cb)
-{
-  return timerQueue_->addTimer(std::move(cb), time, 0.0);
-}
-
-TimerId EventLoop::runAfter(double delay, TimerCallback&& cb)
-{
-  Timestamp time(addTime(Timestamp::now(), delay));
-  return runAt(time, std::move(cb));
-}
-
-TimerId EventLoop::runEvery(double interval, TimerCallback&& cb)
-{
-  Timestamp time(addTime(Timestamp::now(), interval));
-  return timerQueue_->addTimer(std::move(cb), time, interval);
-}
-#endif
 
 void EventLoop::cancel(TimerId timerId)
 {
@@ -259,6 +221,7 @@ void EventLoop::abortNotInLoopThread()
             << ", current thread id = " <<  CurrentThread::tid();
 }
 
+//向写端写入一个字节
 void EventLoop::wakeup()
 {
   uint64_t one = 1;
@@ -284,6 +247,7 @@ void EventLoop::doPendingFunctors()
   std::vector<Functor> functors;
   callingPendingFunctors_ = true;
 
+  //避免对pendingFunctors_争用，采用swap技术
   {
   MutexLockGuard lock(mutex_);
   functors.swap(pendingFunctors_);

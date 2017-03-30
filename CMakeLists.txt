@@ -21,4 +21,4 @@ include_directories(/usr/local/include)
 
 
 add_subdirectory(server/base)
-#add_subdirectory(server/net)
+add_subdirectory(server/net)

@@ -14,7 +14,7 @@
 using namespace server;
 using namespace server::net;
 
-void muduo::net::defaultConnectionCallback(const TcpConnectionPtr& conn)
+void server::net::defaultConnectionCallback(const TcpConnectionPtr& conn)
 {
   LOG_TRACE << conn->localAddress().toIpPort() << " -> "
             << conn->peerAddress().toIpPort() << " is "
@@ -22,7 +22,7 @@ void muduo::net::defaultConnectionCallback(const TcpConnectionPtr& conn)
   // do not call conn->forceClose(), because some users want to register message callback only.
 }
 
-void muduo::net::defaultMessageCallback(const TcpConnectionPtr&,
+void server::net::defaultMessageCallback(const TcpConnectionPtr&,
                                         Buffer* buf,
                                         Timestamp)
 {

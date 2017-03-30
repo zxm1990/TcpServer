@@ -23,7 +23,7 @@ public:
 	void start();
 	int join(); //return pthread_join()
 
-	bool start() const 
+	bool started() const 
 	{
 		return started_;
 	}

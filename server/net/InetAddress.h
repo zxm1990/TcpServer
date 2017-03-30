@@ -15,7 +15,7 @@ namespace net
 /// Wrapper of sockaddr_in.
 ///
 /// This is an POD interface class.
-class InetAddress : public muduo::copyable
+class InetAddress : public server::copyable
 {
  public:
   /// Constructs an endpoint with given port number.

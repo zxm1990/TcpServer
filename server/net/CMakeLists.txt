@@ -1,3 +1,9 @@
+include(CheckFunctionExists)
+
+check_function_exists(accept4 HAVE_ACCEPT4)
+if(NOT HAVE_ACCEPT4)
+  set_source_files_properties(SocketsOps.cc PROPERTIES COMPILE_FLAGS "-DNO_ACCEPT4")
+endif()
 
 set(net_SRCS
   Acceptor.cc
@@ -23,6 +29,7 @@ set(net_SRCS
 add_library(server_net ${net_SRCS})
 target_link_libraries(server_net server_base)
 
+add_subdirectory(http)
 
 
 

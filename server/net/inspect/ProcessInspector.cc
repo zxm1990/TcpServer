@@ -108,7 +108,7 @@ int stringPrintf(string* out, const char* fmt, ...)
 }
 }
 
-using namespace muduo::inspect;
+using namespace server::inspect;
 
 string ProcessInspector::username_ = ProcessInfo::username();
 

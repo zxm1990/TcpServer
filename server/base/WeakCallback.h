@@ -17,23 +17,24 @@ class WeakCallback
 {
 public:
 
-  WeakCallback(const boost::weak_ptr<CLASS>& object,
-               const boost::function<void (CLASS*)>& function)
-    : object_(object), function_(function)
+    WeakCallback(const boost::weak_ptr<CLASS>& object,
+                 const boost::function<void (CLASS*)>& function)
+        : object_(object), function_(function)
     {
     
     }
 
   // Default dtor, copy ctor and assignment are okay
 
-  void operator()() const
-  {
+    //智能指针作为回调函数的参数
+    void operator()() const
+    {
         boost::shared_ptr<CLASS> ptr(object_.lock());
         if (ptr)
         {
             function_(ptr.get());
         }
-  }
+    }
 
 private:
 

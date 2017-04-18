@@ -21,6 +21,7 @@ namespace CurrentThread
 	inline int tid()
 	{
 		//类似unlikely
+		//为0表示第一次调用，需要记录到缓存中
 		if (__builtin_expect(t_cachedTid == 0, 0))
 		{
 			cacheTid();

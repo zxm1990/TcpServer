@@ -22,6 +22,8 @@ void test(int maxSize)
   LOG_WARN << "Test ThreadPool with max queue size = " << maxSize;
   server::ThreadPool pool("MainThreadPool");
   pool.setMaxQueueSize(maxSize);
+
+  //创建5个线程的线程池
   pool.start(5);
 
   LOG_WARN << "Adding";
@@ -43,9 +45,11 @@ void test(int maxSize)
 
 int main()
 {
-  test(0);
-  /*test(1);
+  //server::Logger loger(__FILE__, __LINE__, server::Logger::TRACE, __func__);
+  //loger.setLogLevel(server::Logger::TRACE);
+  //test(0);
+  //test(1);
   test(5);
-  test(10);
-  test(50);*/
+  //test(10);
+  //test(50);
 }

@@ -7,3 +7,6 @@ target_link_libraries(TimeZone_test server_base)
 
 add_executable(ThreadLocalSingleton_test ThreadLocalSingleton_test.cc)
 target_link_libraries(ThreadLocalSingleton_test server_base)
+
+add_executable(thread_test Thread_test.cc)
+target_link_libraries(thread_test server_base)

@@ -97,6 +97,9 @@ struct ThreadData
 #ifndef __MACH__
     ::prctl(PR_SET_NAME, server::CurrentThread::t_threadName);
 #endif
+
+    LOG_TRACE << " create thread id " << server::CurrentThread::tid() 
+              << " name is " << server::CurrentThread::t_threadName;
     try
     {
       func_();

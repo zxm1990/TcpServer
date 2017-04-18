@@ -1,5 +1,7 @@
 #include <server/base/ThreadPool.h>
 #include <server/base/Exception.h>
+#include <server/base/CurrentThread.h>
+#include <server/base/Logging.h>
 
 #include <boost/bind.hpp>
 #include <assert.h>
@@ -85,7 +87,7 @@ ThreadPool::Task ThreadPool::take()
 	{
 		notEmpty_.wait();
 	}
-
+	LOG_TRACE << " threadpoll take a thread is " << server::CurrentThread::tid();
 	Task task;
 	if (!queue_.empty())
 	{

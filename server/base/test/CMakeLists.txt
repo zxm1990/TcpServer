@@ -19,3 +19,6 @@ target_link_libraries(ThreadLocal_test server_base)
 
 add_executable(Singleton_test Singleton_test.cc)
 target_link_libraries(Singleton_test server_base)
+
+add_executable(ProcessInfo_test ProcessInfo_test.cc)
+target_link_libraries(ProcessInfo_test server_base)

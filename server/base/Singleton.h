@@ -39,6 +39,9 @@ class Singleton : boost::noncopyable
   static void init()
   {
     value_ = new T();
+
+    //没有成员的实例，不会释放资源
+    //会有一个字节的资源泄露
     if (!detail::has_no_destroy<T>::value)
     {
       ::atexit(destroy);

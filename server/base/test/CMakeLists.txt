@@ -16,3 +16,6 @@ target_link_libraries(AsyncLogging_test server_base)
 
 add_executable(ThreadLocal_test ThreadLocal_test.cc)
 target_link_libraries(ThreadLocal_test server_base)
+
+add_executable(Singleton_test Singleton_test.cc)
+target_link_libraries(Singleton_test server_base)

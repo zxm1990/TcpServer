@@ -8,53 +8,61 @@
 
 class Test : boost::noncopyable
 {
- public:
-  Test()
-  {
-    printf("tid=%d, constructing %p\n", server::CurrentThread::tid(), this);
-  }
+public:
+	Test()
+	{
+		printf("tid = %d, construction %p\n", server::CurrentThread::tid(), this);
+	}
 
-  ~Test()
-  {
-    printf("tid=%d, destructing %p %s\n", server::CurrentThread::tid(), this, name_.c_str());
-  }
+	~Test()
+	{
+		printf("tid = %d, destruction %p, name = %s\n", server::CurrentThread::tid(), this, name_.c_str());
+	}
 
-  const server::string& name() const { return name_; }
-  void setName(const server::string& n) { name_ = n; }
+	const server::string& name() const 
+	{
+		return name_;
+	}
 
- private:
-  server::string name_;
+	void setName(const server::string& n)
+	{
+		name_ = n;
+	}
+
+private:
+	server::string name_;
 };
 
-void threadFunc(const char* changeTo)
+void threadFunc(const char *changeTo)
 {
-  printf("tid=%d, %p name=%s\n",
-         server::CurrentThread::tid(),
-         &server::ThreadLocalSingleton<Test>::instance(),
-         server::ThreadLocalSingleton<Test>::instance().name().c_str());
-  server::ThreadLocalSingleton<Test>::instance().setName(changeTo);
-  printf("tid=%d, %p name=%s\n",
-         server::CurrentThread::tid(),
-         &server::ThreadLocalSingleton<Test>::instance(),
-         server::ThreadLocalSingleton<Test>::instance().name().c_str());
+	printf("tid = %d, %p name = %s\n", 
+			server::CurrentThread::tid(),
+			&server::ThreadLocalSingleton<Test>::instance(),
+			server::ThreadLocalSingleton<Test>::instance().name().c_str());
 
-  // no need to manually delete it
-  // server::ThreadLocalSingleton<Test>::destroy();
+	server::ThreadLocalSingleton<Test>::instance().setName(changeTo);
+
+	printf("tid = %d, %p name = %s\n", 
+			server::CurrentThread::tid(),
+			&server::ThreadLocalSingleton<Test>::instance(),
+			server::ThreadLocalSingleton<Test>::instance().name().c_str());
+
 }
 
 int main()
 {
-  server::ThreadLocalSingleton<Test>::instance().setName("main one");
-  server::Thread t1(boost::bind(threadFunc, "thread1"));
-  server::Thread t2(boost::bind(threadFunc, "thread2"));
-  t1.start();
-  t2.start();
-  t1.join();
-  printf("tid=%d, %p name=%s\n",
-         server::CurrentThread::tid(),
-         &server::ThreadLocalSingleton<Test>::instance(),
-         server::ThreadLocalSingleton<Test>::instance().name().c_str());
-  t2.join();
+	server::ThreadLocalSingleton<Test>::instance().setName("main one");
+	server::Thread t1(boost::bind(threadFunc, "thread1"));
+	server::Thread t2(boost::bind(threadFunc, "thread2"));
+	t1.start();
+	t2.start();
+	t1.join();
+	printf("tid = %d, %p name = %s\n", 
+			server::CurrentThread::tid(),
+			&server::ThreadLocalSingleton<Test>::instance(),
+			server::ThreadLocalSingleton<Test>::instance().name().c_str());
 
-  pthread_exit(0);
+	t2.join();
+
+	pthread_exit(0);
 }

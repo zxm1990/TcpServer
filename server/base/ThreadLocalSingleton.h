@@ -8,6 +8,7 @@
 namespace server
 {
 
+//对于每个线程保存自己的数据
 template<typename T>
 class ThreadLocalSingleton : boost::noncopyable
 {

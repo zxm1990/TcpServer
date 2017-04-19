@@ -29,6 +29,10 @@ ThreadPool::~ThreadPool()
 }
 
 //创建numThreads个线程
+/*
+*客户端调用
+*创建n个线程 ，并且存储线程对象
+*/
 void ThreadPool::start(int numThreads)
 {
 	assert(threads_.empty());
@@ -60,6 +64,10 @@ void ThreadPool::stop()
 		     boost::bind(&server::Thread::join, _1));
 }
 
+/*
+*客户端调用，只能看到线程池，看不到任务具体执行的线程
+*具体有哪个线程执行，有线程池安排，通过条件变量，由系统选定
+*/
 void ThreadPool::run(const Task &task)
 {
 	if (threads_.empty())
@@ -85,6 +93,8 @@ ThreadPool::Task ThreadPool::take()
 	MutexLockGuard lock(mutex_);
 	while (queue_.empty() && running_)
 	{
+		//因为没有任务到来，所有线程都空闲
+		//所有的线程都阻塞这
 		notEmpty_.wait();
 	}
 	LOG_TRACE << " threadpoll take a thread is " << server::CurrentThread::tid();

@@ -9,6 +9,10 @@
 namespace server
 {
 
+/*
+* 对于一个对象，对于每个线程是具备不同的值，最好定义为全局性质
+* 功能可以类比于__thread这个关键字
+*/
 template<typename T>
 class ThreadLocal : boost::noncopyable
 {

@@ -8,8 +8,11 @@ target_link_libraries(TimeZone_test server_base)
 add_executable(ThreadLocalSingleton_test ThreadLocalSingleton_test.cc)
 target_link_libraries(ThreadLocalSingleton_test server_base)
 
-add_executable(thread_test Thread_test.cc)
-target_link_libraries(thread_test server_base)
+add_executable(Thread_test Thread_test.cc)
+target_link_libraries(Thread_test server_base)
 
 add_executable(AsyncLogging_test AsyncLogging_test.cc)
 target_link_libraries(AsyncLogging_test server_base)
+
+add_executable(ThreadLocal_test ThreadLocal_test.cc)
+target_link_libraries(ThreadLocal_test server_base)

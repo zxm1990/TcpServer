@@ -26,6 +26,7 @@ AsyncLogging::AsyncLogging(const string& basename,
   buffers_.reserve(16);
 }
 
+//客户端调用
 void AsyncLogging::append(const char* logline, int len)
 {
   server::MutexLockGuard lock(mutex_);
@@ -50,6 +51,8 @@ void AsyncLogging::append(const char* logline, int len)
   }
 }
 
+
+//日志线程不停的运行
 void AsyncLogging::threadFunc()
 {
   assert(running_ == true);

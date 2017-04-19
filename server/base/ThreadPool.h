@@ -15,6 +15,12 @@
 namespace server
 {
 
+//线程池
+/*
+* 线程池有任务队列
+* 队列有大小，就必须有条件变量，来通知线程执行
+*具体每个线程执行什么任务，需要将函数注册到线程对象中
+*/
 class ThreadPool : boost::noncopyable
 {
 public:

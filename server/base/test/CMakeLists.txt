@@ -22,3 +22,6 @@ target_link_libraries(Singleton_test server_base)
 
 add_executable(ProcessInfo_test ProcessInfo_test.cc)
 target_link_libraries(ProcessInfo_test server_base)
+
+add_executable(Threadbench_test Threadbench_test.cc)
+target_link_libraries(Threadbench_test server_base)

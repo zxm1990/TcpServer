@@ -25,3 +25,6 @@ target_link_libraries(ProcessInfo_test server_base)
 
 add_executable(Threadbench_test Threadbench_test.cc)
 target_link_libraries(Threadbench_test server_base)
+
+add_executable(Mutex_test Mutex_test.cc)
+target_link_libraries(Mutex_test server_base)

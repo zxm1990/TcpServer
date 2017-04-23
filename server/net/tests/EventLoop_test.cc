@@ -23,7 +23,7 @@ void print(const char *msg)
 
 int main()
 {
-	printf("pid = %d, tid = %d\n", getpid(), CurrendThread::tid());
+	printf("pid = %d, tid = %d\n", getpid(), CurrentThread::tid());
 	
 	sleep(10);
 	{

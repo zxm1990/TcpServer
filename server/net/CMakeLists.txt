@@ -31,5 +31,6 @@ target_link_libraries(server_net server_base)
 
 add_subdirectory(http)
 add_subdirectory(inspect)
+add_subdirectory(tests)
 
 

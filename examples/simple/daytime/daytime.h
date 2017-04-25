@@ -1,7 +1,7 @@
 #ifndef SERVER_EXAMPLES_SIMPLE_DAYTIME_DAYTIME_H
 #define SERVER_EXAMPLES_SIMPLE_DAYTIME_DAYTIME_H
 
-#include <server/base/TcpServer.h>
+#include <server/net/TcpServer.h>
 
 class DaytimeServer
 {

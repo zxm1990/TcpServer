@@ -1,7 +1,7 @@
 #include "daytime.h"
 
 #include <server/base/Logging.h>
-#include <server/base/EventLoop.h>
+#include <server/net/EventLoop.h>
 
 #include <boost/bind.hpp>
 
@@ -21,4 +21,23 @@ void DaytimeServer::start()
 	server_.start();
 }
 
-void DaytimeServer::onConnection()
+void DaytimeServer::onConnection(const TcpConnectionPtr& conn)
+{
+  LOG_INFO << "DaytimeServer - " << conn->peerAddress().toIpPort() << " -> "
+           << conn->localAddress().toIpPort() << " is "
+           << (conn->connected() ? "UP" : "DOWN");
+  if (conn->connected())
+  {
+    conn->send(Timestamp::now().toFormattedString() + "\n");
+    conn->shutdown();
+  }
+}
+
+void DaytimeServer::onMessage(const TcpConnectionPtr& conn,
+                              Buffer* buf,
+                              Timestamp time)
+{
+  string msg(buf->retrieveAllAsString());
+  LOG_INFO << conn->name() << " discards " << msg.size()
+           << " bytes received at " << time.toString();
+}

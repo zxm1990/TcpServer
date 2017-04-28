@@ -9,3 +9,6 @@ target_link_libraries(simple_daytime server_net)
 
 add_executable(simple_time time/time.cc time/main.cc)
 target_link_libraries(simple_time server_net)
+
+add_executable(simple_timeclient timeclient/timeclient.cc)
+target_link_libraries(simple_timeclient server_net)

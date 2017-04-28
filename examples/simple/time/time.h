@@ -1,10 +1,12 @@
 #ifndef SERVER_EXAMPLES_SIMPLE_TIME_TIME_H
 #define SERVER_EXAMPLES_SIMPLE_TIME_TIME_H
 
-class TimrServer
+#include <server/net/TcpServer.h>
+
+class TimeServer
 {
 public:
-	TimrServer(server::net::EventLoop *loop,
+	TimeServer(server::net::EventLoop *loop,
 			  const server::net::InetAddress &listenAddr);
 
 	void start();

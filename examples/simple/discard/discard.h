@@ -3,6 +3,7 @@
 
 #include <server/net/TcpServer.h>
 
+//丢弃收到的数据
 class DiscardServer
 {
 public:

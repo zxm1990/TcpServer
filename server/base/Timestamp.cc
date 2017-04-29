@@ -36,6 +36,7 @@ string Timestamp::toFormattedString(bool showMicroseconds) const
   char buf[32] = {0};
   time_t seconds = static_cast<time_t>(microSecondsSinceEpoch_ / kMicroSecondsPerSecond);
   struct tm tm_time;
+  //获取的是格林威治时间，比北京时间慢8个小时
   gmtime_r(&seconds, &tm_time);
 
   if (showMicroseconds)

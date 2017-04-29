@@ -3,14 +3,14 @@
 
 #include <server/net/TcpServer.h>
 
-// RFC 862
+// 将收到的数据发给客户端
 class EchoServer
 {
  public:
   EchoServer(server::net::EventLoop* loop,
              const server::net::InetAddress& listenAddr);
 
-  void start();  // calls server_.start();
+  void start(); 
 
  private:
   void onConnection(const server::net::TcpConnectionPtr& conn);

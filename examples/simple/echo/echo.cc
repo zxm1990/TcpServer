@@ -34,6 +34,7 @@ void EchoServer::onMessage(const server::net::TcpConnectionPtr& conn,
   server::string msg(buf->retrieveAllAsString());
   LOG_INFO << conn->name() << " echo " << msg.size() << " bytes, "
            << "data received at " << time.toString();
+  //服务器收到的数据立即发给客户端
   conn->send(msg);
 }
 

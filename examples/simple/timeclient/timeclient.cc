@@ -46,6 +46,7 @@ private:
 
 	void onMessage(const TcpConnectionPtr &conn, Buffer *buf, Timestamp receiveTime)
 	{
+		//数据不完整的时候，继续留在缓冲区
 		if (buf->readableBytes() >= sizeof(int32_t))
 		{
 			const void *data = buf->peek();

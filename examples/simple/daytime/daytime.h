@@ -3,6 +3,7 @@
 
 #include <server/net/TcpServer.h>
 
+//以字符串的形式发送当前时间，并主动断开连接
 class DaytimeServer
 {
 public:

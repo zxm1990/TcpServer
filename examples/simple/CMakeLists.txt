@@ -15,3 +15,13 @@ target_link_libraries(simple_timeclient server_net)
 
 add_executable(simple_chargen chargen/chargen.cc chargen/main.cc)
 target_link_libraries(simple_chargen server_net)
+
+add_executable(simple_allinone 
+	chargen/chargen.cc 
+	time/time.cc
+	chargen/chargen.cc
+	echo/echo.cc
+	discard/discard.cc
+	daytime/daytime.cc
+	allinone/allinone.cc)
+target_link_libraries(simple_allinone server_net)

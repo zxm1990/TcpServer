@@ -15,11 +15,13 @@ void mysleep(int seconds)
 
 void threadFunc()
 {
+	//线程t1
 	printf("tid = %d\n", server::CurrentThread::tid());
 }
 
 void threadFunc2(int x)
 {
+	//线程t2
 	printf("tid = %d, x = %d\n", server::CurrentThread::tid(), x);
 }
 

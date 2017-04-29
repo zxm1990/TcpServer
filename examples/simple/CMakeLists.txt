@@ -12,3 +12,6 @@ target_link_libraries(simple_time server_net)
 
 add_executable(simple_timeclient timeclient/timeclient.cc)
 target_link_libraries(simple_timeclient server_net)
+
+add_executable(simple_chargen chargen/chargen.cc chargen/main.cc)
+target_link_libraries(simple_chargen server_net)

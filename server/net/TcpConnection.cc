@@ -203,30 +203,6 @@ void TcpConnection::shutdownInLoop()
   }
 }
 
-// void TcpConnection::shutdownAndForceCloseAfter(double seconds)
-// {
-//   // FIXME: use compare and swap
-//   if (state_ == kConnected)
-//   {
-//     setState(kDisconnecting);
-//     loop_->runInLoop(boost::bind(&TcpConnection::shutdownAndForceCloseInLoop, this, seconds));
-//   }
-// }
-
-// void TcpConnection::shutdownAndForceCloseInLoop(double seconds)
-// {
-//   loop_->assertInLoopThread();
-//   if (!channel_->isWriting())
-//   {
-//     // we are not writing
-//     socket_->shutdownWrite();
-//   }
-//   loop_->runAfter(
-//       seconds,
-//       makeWeakCallback(shared_from_this(),
-//                        &TcpConnection::forceCloseInLoop));
-// }
-
 void TcpConnection::forceClose()
 {
   // FIXME: use compare and swap
@@ -314,12 +290,15 @@ void TcpConnection::handleWrite()
   loop_->assertInLoopThread();
   if (channel_->isWriting())
   {
+    //写入发送缓冲区的只读区域数据
     ssize_t n = sockets::write(channel_->fd(),
                                outputBuffer_.peek(),
                                outputBuffer_.readableBytes());
     if (n > 0)
     {
+      //缩小只读区域n个长度
       outputBuffer_.retrieve(n);
+      //只读区域为0，说明全部一次发送完毕
       if (outputBuffer_.readableBytes() == 0)
       {
         channel_->disableWriting();

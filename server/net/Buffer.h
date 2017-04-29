@@ -67,7 +67,7 @@ class Buffer : public server::copyable
   size_t prependableBytes() const
   { return readerIndex_; }
 
-  //定位到只读区域
+  //定位到只读区域的头部
   const char* peek() const
   { return begin() + readerIndex_; }
 
@@ -104,7 +104,7 @@ class Buffer : public server::copyable
   // retrieve returns void, to prevent
   // string str(retrieve(readableBytes()), readableBytes());
   // the evaluation of two functions are unspecified
-  //扩大pre区域，扩大len，缩小只读区域
+  //扩大pre区域，缩小只读区域，缩小len长度
   void retrieve(size_t len)
   {
     assert(len <= readableBytes());
@@ -146,7 +146,7 @@ class Buffer : public server::copyable
     retrieve(sizeof(int8_t));
   }
 
-  //恢复只读可写区域
+  //恢复只读可写区域，此时只读区域为0
   void retrieveAll()
   {
     readerIndex_ = kCheapPrepend;

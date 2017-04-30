@@ -348,12 +348,14 @@ class Buffer : public server::copyable
   {
     prepend(&x, sizeof x);
   }
-
+  
+  //在只读区域的头部插入指定的数据
   void prepend(const void* /*restrict*/ data, size_t len)
   {
     assert(len <= prependableBytes());
     readerIndex_ -= len;
     const char* d = static_cast<const char*>(data);
+    //(start, end, insert())
     std::copy(d, d+len, begin()+readerIndex_);
   }
 

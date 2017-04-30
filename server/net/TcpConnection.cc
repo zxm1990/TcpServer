@@ -175,6 +175,8 @@ void TcpConnection::sendInLoop(const void* data, size_t len)
     {
         //上一次待发送的数据
         size_t oldLen = outputBuffer_.readableBytes();
+        //当一次发送的数据超过了用户设置的大小
+        //回调highmark
         if (oldLen + remaining >= highWaterMark_
             && oldLen < highWaterMark_
             && highWaterMarkCallback_)

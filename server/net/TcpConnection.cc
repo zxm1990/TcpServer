@@ -129,57 +129,64 @@ void TcpConnection::sendInLoop(const StringPiece& message)
 
 void TcpConnection::sendInLoop(const void* data, size_t len)
 {
-  loop_->assertInLoopThread();
-  ssize_t nwrote = 0;
-  size_t remaining = len;
-  bool faultError = false;
-  if (state_ == kDisconnected)
-  {
-    LOG_WARN << "disconnected, give up writing";
-    return;
-  }
-  // if no thing in output queue, try writing directly
-  if (!channel_->isWriting() && outputBuffer_.readableBytes() == 0)
-  {
-    nwrote = sockets::write(channel_->fd(), data, len);
-    if (nwrote >= 0)
+    loop_->assertInLoopThread();
+    ssize_t nwrote = 0;
+    size_t remaining = len;
+    bool faultError = false;
+  
+    if (state_ == kDisconnected)
     {
-      remaining = len - nwrote;
-      if (remaining == 0 && writeCompleteCallback_)
-      {
-        loop_->queueInLoop(boost::bind(writeCompleteCallback_, shared_from_this()));
-      }
+        LOG_WARN << "disconnected, give up writing";
+        return;
     }
-    else // nwrote < 0
+  
+    // if no thing in output queue, try writing directly
+    if (!channel_->isWriting() && outputBuffer_.readableBytes() == 0)
     {
-      nwrote = 0;
-      if (errno != EWOULDBLOCK)
-      {
-        LOG_SYSERR << "TcpConnection::sendInLoop";
-        if (errno == EPIPE || errno == ECONNRESET) // FIXME: any others?
+        nwrote = sockets::write(channel_->fd(), data, len);
+        if (nwrote >= 0)
         {
-          faultError = true;
-        }
-      }
-    }
-  }
+            remaining = len - nwrote;
 
-  assert(remaining <= len);
-  if (!faultError && remaining > 0)
-  {
-    size_t oldLen = outputBuffer_.readableBytes();
-    if (oldLen + remaining >= highWaterMark_
-        && oldLen < highWaterMark_
-        && highWaterMarkCallback_)
-    {
-      loop_->queueInLoop(boost::bind(highWaterMarkCallback_, shared_from_this(), oldLen + remaining));
+            //如果一次性写完
+            if (remaining == 0 && writeCompleteCallback_)
+            {
+                loop_->queueInLoop(boost::bind(writeCompleteCallback_, shared_from_this()));
+            }
+        }
+        else // nwrote < 0
+        {
+            nwrote = 0;
+            if (errno != EWOULDBLOCK)
+            {
+                LOG_SYSERR << "TcpConnection::sendInLoop";
+                //如果fd不可写，继续写会返回EPIPE
+                //发送过程中，对方中断，返回ECONNRESET
+                if (errno == EPIPE || errno == ECONNRESET) // FIXME: any others?
+                {
+                    faultError = true;
+                }
+            }
+        }
     }
-    outputBuffer_.append(static_cast<const char*>(data)+nwrote, remaining);
-    if (!channel_->isWriting())
+
+    assert(remaining <= len);
+    if (!faultError && remaining > 0)
     {
-      channel_->enableWriting();
+        //上一次待发送的数据
+        size_t oldLen = outputBuffer_.readableBytes();
+        if (oldLen + remaining >= highWaterMark_
+            && oldLen < highWaterMark_
+            && highWaterMarkCallback_)
+        {
+            loop_->queueInLoop(boost::bind(highWaterMarkCallback_, shared_from_this(), oldLen + remaining));
+        }
+        outputBuffer_.append(static_cast<const char*>(data)+nwrote, remaining);
+        if (!channel_->isWriting())
+        {
+            channel_->enableWriting();
+        }
     }
-  }
 }
 
 void TcpConnection::shutdown()

@@ -1,0 +1,2 @@
+add_executable(filetransfer_download1 download1.cc)
+target_link_libraries(filetransfer_download1 server_net)

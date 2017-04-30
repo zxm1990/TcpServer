@@ -284,6 +284,7 @@ void TcpConnection::handleRead(Timestamp receiveTime)
   }
   else if (n == 0)
   {
+    //读取数据为0时，要开始析构connection对象了
     handleClose();
   }
   else

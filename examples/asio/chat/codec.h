@@ -9,6 +9,8 @@
 #include <boost/function.hpp>
 #include <boost/noncopyable.hpp>
 
+//将收到的数据解析
+//将发送的数据进行包装
 class LengthHeaderCodec : boost::noncopyable
 {
 public:
@@ -21,6 +23,7 @@ public:
 
 	}
 
+	//收到数据的第一位，解析数据，将解析的数据发送给服务器
 	void onMessage(const server::net::TcpConnectionPtr &conn,
 				   server::net::Buffer *buf,
 				   server::Timestamp receiveTime)
@@ -31,7 +34,7 @@ public:
 			//定位到只读区域的头部
 			const void *data = buf->peek();
 			//消息格式的前面4个字节代表消息的长度
-			int32_t be32 = *static_cast<int32_t*>(data);
+			int32_t be32 = *static_cast<const int32_t*>(data);
 			const int32_t len = server::net::sockets::networkToHost32(be32);
 			if (len > 65536 || len < 0)
 			{
@@ -55,7 +58,8 @@ public:
 		}
 	}
 
-	void send(server::net::TcpConnectionPtr *conn,
+	//发送数据的第一位，包装之后，发送给客户端
+	void send(server::net::TcpConnection *conn,
 			 const server::StringPiece &message)
 	{
 		server::net::Buffer buf;

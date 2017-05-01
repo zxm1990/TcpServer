@@ -350,6 +350,7 @@ void TcpConnection::handleClose()
   TcpConnectionPtr guardThis(shared_from_this());
   connectionCallback_(guardThis);
   // must be the last line
+  //在tcpserver或者tcpclient中将引用计数减1
   closeCallback_(guardThis);
 }
 

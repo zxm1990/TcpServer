@@ -25,6 +25,12 @@ class Message;
 }
 }
 
+namespace server
+{
+
+namespace net
+{
+
 class Buffer;
 class TcpConnection;
 typedef boost::shared_ptr<TcpConnection> TcpConnectionPtr;
@@ -49,9 +55,9 @@ public:
 
 	enum ErrorCode
 	{
-		kNoError = 0;
+		kNoError = 0,
 		kInvalidLength,
-		kCheckSunError,
+		kCheckSumError,
 		kInvalidNameLen,
 		kUnknownMessageType,
 		kParseError,
@@ -76,11 +82,11 @@ public:
 					  const RawMessageCallback &rawCb = RawMessageCallback(),
 					  const ErrorCallback &errorCb = defaultErrorCallback)
 		: prototype_(prototype),
-		  tag_(tagArg.as_string(),
+		  tag_(tagArg.as_string()),
 		  messageCallback_(messageCb),
 		  rawCb_(rawCb),
 		  errorCallback_(errorCb),
-		  kMinMessageLen(tagArg.size() + kChecksumLen))
+		  kMinMessageLen(tagArg.size() + kChecksumLen)
 	{
 
 	}
@@ -95,7 +101,7 @@ public:
 		return tag_;
 	}
 
-	void send(const TcpConnectionPtr &conn，
+	void send(const TcpConnectionPtr &conn,
 			  const ::google::protobuf::Message &message);
 
 	void onMessage(const TcpConnectionPtr &conn,
@@ -178,10 +184,10 @@ class ProtobufCodecLiteT
                       const MessagePtr& message,
                       Timestamp receiveTime)
   	{
-    	messageCallback_(conn, ::muduo::down_pointer_cast<MSG>(message), receiveTime);
+    	messageCallback_(conn, ::server::down_pointer_cast<MSG>(message), receiveTime);
   	}
 
-  	void fillEmptyBuffer(muduo::net::Buffer* buf, const MSG& message)
+  	void fillEmptyBuffer(server::net::Buffer* buf, const MSG& message)
   	{
     	codec_.fillEmptyBuffer(buf, message);
   	}
@@ -190,5 +196,9 @@ private:
 	ProtobufMessageCallback messageCallback_;
   	CODEC codec_;
 };
+
+} //net
+
+} //server
 
 #endif //SERVER_NET_PROTOBUF_CODEC_H

@@ -1,0 +1,3 @@
+add_library(server_protobuf_codec ProtobufCodecLite.cc)
+set_target_properties(server_protobuf_codec PROPERTIES COMPILE_FLAGS "-Wno-error=shadow")
+target_link_libraries(server_protobuf_codec server_net protobuf z)

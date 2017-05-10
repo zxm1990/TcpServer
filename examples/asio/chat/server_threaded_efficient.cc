@@ -6,6 +6,8 @@
 #include <server/net/TcpServer.h>
 
 #include <boost/bind.hpp>
+#include <boost/shared_ptr.hpp>
+
 #include <set>
 #include <stdio.h>
 
@@ -18,7 +20,8 @@ public:
 	ChatServer(EventLoop *loop,
 			   const InetAddress &listenAddr)
 		: server_(loop, listenAddr, "ChatServer"),
-		  codec_(boost::bind(&ChatServer::onStringMessage, this, _1, _2, _3))
+		  codec_(boost::bind(&ChatServer::onStringMessage, this, _1, _2, _3)),
+		  connections_(new ConnectionList)
 	{
 		server_.setConnectionCallback(boost::bind(&ChatServer::onConnection, this, _1));
 		server_.setMessageCallback(boost::bind(&LengthHeaderCodec::onMessage, &codec_, _1, _2, _3));
@@ -35,42 +38,62 @@ public:
 	}
 
 private:
+	//使用copy-on-write技术实现读写锁功能
 	void onConnection(const TcpConnectionPtr &conn)
 	{
 		LOG_INFO << conn->localAddress().toIpPort() << " -> "
         		 << conn->peerAddress().toIpPort() << " is "
         		 << (conn->connected() ? "UP" : "DOWN");
 
+       	//注意锁保护的临界区
       	MutexLockGuard lock(mutex_);
+      	//如果有读者，先把数据拷贝出来
+      	if (!connections_.unique())
+      	{
+      		connections_.reset(new ConnectionList(*connections_));
+      	}
+      	assert(connections_.unique());
+
       	if (conn->connected())
       	{
-      		connections_.insert(conn);
+      		connections_->insert(conn);
       	}
       	else
       	{
-      		connections_.erase(conn);
+      		connections_->erase(conn);
       	}
 	}
 
-	//如果send比较慢，线程太多，会导致锁争用，出现性能瓶颈
+	//下面的定义一个变量要使用
+	typedef std::set<TcpConnectionPtr> ConnectionList;
+	typedef boost::shared_ptr<ConnectionList> ConnectionListPtr;
+
+	//临界区只在获取数据的那一段
 	void onStringMessage(const TcpConnectionPtr &,
 						 const string &message,
 						 Timestamp)
 	{
-		MutexLockGuard lock(mutex_);
-		for (ConnectionList::iterator it = connections_.begin();
-			 it != connections_.end();
+		ConnectionListPtr connections = getConnectionList();
+		for (ConnectionList::iterator it = connections_->begin();
+			 it != connections_->end();
 			 ++it)
 		{
 			codec_.send(get_pointer(*it), message);
 		}
 	}
 
-	typedef std::set<TcpConnectionPtr> ConnectionList;
+	//相对于上一版本临界区变小了
+	ConnectionListPtr getConnectionList()
+  	{
+    	MutexLockGuard lock(mutex_);
+    	return connections_;
+  	}
+
+
   	TcpServer server_;
   	LengthHeaderCodec codec_;
   	MutexLock mutex_;
-  	ConnectionList connections_;
+  	ConnectionListPtr connections_;
 };
 
 int main(int argc, char *argv[])

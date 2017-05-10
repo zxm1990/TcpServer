@@ -135,6 +135,8 @@ private:
 
 };
 
+//给具体的Message类用的模板
+//可以简单的认为Message类是一个抽象类
 template<typename MSG, const char* TAG, typename CODEC=ProtobufCodecLite>  
 class ProtobufCodecLiteT
 {

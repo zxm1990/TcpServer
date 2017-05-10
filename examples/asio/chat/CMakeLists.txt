@@ -3,3 +3,6 @@ target_link_libraries(asio_chat_client server_net)
 
 add_executable(asio_chat_server server.cc)
 target_link_libraries(asio_chat_server server_net)
+
+add_executable(asio_chat_server_threaded server_threaded.cc)
+target_link_libraries(asio_chat_server_threaded server_net)

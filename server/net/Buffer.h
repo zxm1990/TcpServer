@@ -204,6 +204,7 @@ class Buffer : public server::copyable
   const char* beginWrite() const
   { return begin() + writerIndex_; }
 
+  //移动write Index
   void hasWritten(size_t len)
   {
     assert(len <= writableBytes());
@@ -348,7 +349,7 @@ class Buffer : public server::copyable
   {
     prepend(&x, sizeof x);
   }
-  
+
   //在只读区域的头部插入指定的数据
   void prepend(const void* /*restrict*/ data, size_t len)
   {
